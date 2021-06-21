@@ -10,7 +10,7 @@ services:
             MYSQL_PASSWORD: pwd
             MYSQL_DATABASE: dev
         volumes:
-            - ./src/db:/docker-entrypoint-initdb.d/
+            - ./db:/docker-entrypoint-initdb.d/
             - db_data:/var/lib/mysql
 volumes:
     db_data:

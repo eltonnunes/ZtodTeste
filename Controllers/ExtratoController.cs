@@ -8,26 +8,34 @@ using src.Services;
 using System;
 using System.Linq;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace src.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class EnderecoController : ControllerBase
+    public class ExtratoController : ControllerBase
     {
         private readonly devContext _db;
 
-        public EnderecoController(devContext context, ILogger<UsersController> logger)
+        public ExtratoController(devContext context, ILogger<ExtratoController> logger)
         {
             _db = context;
             ILogger _logger = logger;
         }
 
-        [HttpPost("AddEndereco")]
-        public async Task<ActionResult<ExpandoObject>> AddEndereco([FromBody] Endereco endereco)
+        [HttpGet]
+        public async Task<ActionResult<ExpandoObject>> Get()
         {
-            var result = await EnderecoService.Create(_db, endereco);
+            IQueryCollection queryString = Request.Query;
+            var result = await ExtratoService.ListAll(_db, queryString);
+            return result;
+        }
+
+        [HttpGet]
+        [Route("saldo")]
+        public async Task<ActionResult<ExpandoObject>> GetSaldo()
+        {
+            IQueryCollection queryString = Request.Query;
+            var result = await ExtratoService.Saldo(_db, queryString);
             return result;
         }
     }

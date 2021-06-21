@@ -20,7 +20,10 @@ namespace src.database
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options){}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {}
+        {
+            modelBuilder.Entity<User>().ToTable("user");
+            
+        }
 
         
     }

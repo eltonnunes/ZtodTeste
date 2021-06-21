@@ -13,7 +13,7 @@ using src.Utils;
 
 namespace src.Services
 {
-    public static class UserService
+    public static class ExtratoService
     {
         public static async Task<ActionResult<ExpandoObject>> ListAll(devContext _context, IQueryCollection queryString)
         {
@@ -25,10 +25,10 @@ namespace src.Services
                 Where(queryString, out where, out param);
                 where = where.Length > 0 ? where.Substring(0, where.Length - 4) : where;
 
-                string script = @"SELECT * FROM dev.user " + where + @"";
-                var result = await _context.Users//.ToListAsync();//AsQueryable() //.Users.ToListAsync();
-                                                .FromSqlRaw(script, parameters: param.ToArray())
-                                                .OrderBy(o => o.Id)
+                string scriptE = @"SELECT * FROM dev.extrato " + where + @"";
+                var result = await _context.Extratos
+                                                .FromSqlRaw(scriptE, parameters: param.ToArray())
+                                                .OrderBy(o => o.IdExtrato)
                                                 .Select(r => Retorno(queryString, r))
                                                 .ToListAsync();
 
@@ -41,7 +41,7 @@ namespace src.Services
                 if (result == null)
                     return null;
 
-                       return retorno;
+                return retorno;
 
             }
             catch (Exception ex)
@@ -52,56 +52,78 @@ namespace src.Services
             }
         }
 
-        public static async Task<ActionResult<ExpandoObject>> Create(devContext _context, User _object)
+
+        public static async Task<ActionResult<ExpandoObject>> Saldo(devContext _context, IQueryCollection queryString)
         {
+
             try
             {
                 dynamic retorno = new ExpandoObject();
-                User userExist = _context.Users.Where(x => x.Email == _object.Email || x.UserName == _object.UserName).FirstOrDefault();
-                if (userExist != null)
+                string where;
+                List<MySqlConnector.MySqlParameter> param;
+                Where(queryString, out where, out param);
+                where = where.Length > 0 ? where.Substring(0, where.Length - 4) : where;
+
+                string scriptE = @"SELECT * FROM dev.extrato " + where + @"";
+                var resultCredit = await _context.Extratos
+                                                .FromSqlRaw(scriptE, parameters: param.ToArray())
+                                                .OrderBy(o => o.IdExtrato)
+                                                .Where(r => r.FlTipo.Equals("CREDIT"))
+                                                .Select(r => Retorno(queryString, r))
+
+                                                .ToListAsync();
+
+                var resultDebit = await _context.Extratos
+                                .FromSqlRaw(scriptE, parameters: param.ToArray())
+                                .OrderBy(o => o.IdExtrato)
+                                .Where(r => r.FlTipo.Equals("DEBIT"))
+                                .Select(r => Retorno(queryString, r))
+
+                                .ToListAsync();
+
+
+                decimal credito = 0;
+                foreach (var item in resultCredit)
                 {
-                    retorno.Message = "Usuário ou e-mail existente";
-                    retorno.Result = false;
-                    return retorno;
+                    credito = credito + item.VlMovimentado;
                 }
-                else
+
+                decimal debito = 0;
+                foreach (var item2 in resultDebit)
                 {
-                    var obj = await _context.Users.AddAsync(_object);
-                    _context.SaveChanges();
-                    retorno.Result = true;
-                    retorno.Message = "Novo usuário criado";
-                    return retorno;
+                    debito = debito + item2.VlMovimentado;
                 }
-                
-                    
+
+                retorno.saldo = credito - debito;
+
+                if (resultCredit == null && resultDebit == null)
+                    return null;
+
+                return retorno;
+
             }
             catch (Exception ex)
             {
                 dynamic erro = new ExpandoObject();
                 erro.Message = ex.Message;
-                erro.Result = false;
                 return erro;
             }
         }
 
-        private static dynamic GetRetorno(User r)
+        private static dynamic GetRetorno(Extrato r)
         {
             dynamic expando = new ExpandoObject();
 
-            expando.Id = r.Id;
-            expando.IsActive = r.IsActive.Equals(1) ? true : false;
-            expando.CreatedDate = Convert.ToDateTime(r.CreatedDate).ToString("dd/MM/yyyy");
-            expando.UserName = r.UserName;
-            expando.Password = "*********";//r.Password;
-            expando.RealName = r.RealName;
-            expando.NumCpf = r.NumCpf;
-            expando.Email = r.Email;
-            expando.Phone = r.Phone;
+            expando.IdExtrato = r.IdExtrato;
+            expando.UserId = r.UserId;
+            expando.DtExtrato = Convert.ToDateTime(r.DtExtrato).ToString("dd/MM/yyyy");
+            expando.FlTipo = r.FlTipo;
+            expando.VlMovimentado = r.VlMovimentado;
 
             return expando;
         }
        
-        private static dynamic Retorno(IQueryCollection queryString, User r)
+        private static dynamic Retorno(IQueryCollection queryString, Extrato r)
         {
             dynamic expando = new ExpandoObject();
 
@@ -114,51 +136,37 @@ namespace src.Services
                 foreach (string item in cols)
                 {
 
+
                     int key = Convert.ToInt16(item);
                     CAMPOS filtroEnum = (CAMPOS)key;
                     switch (filtroEnum)
                     {
-                        case CAMPOS.Id:
-                            expando.Id = r.Id;
+                        case CAMPOS.IdExtrato:
+                            expando.IdExtrato = r.IdExtrato;
                             break;
-                        case CAMPOS.IsActive:
-                            expando.IsActive = r.IsActive.Equals(1) ? true : false;
+                        case CAMPOS.UserId:
+                            expando.UserId = r.UserId;
                             break;
-                        case CAMPOS.CreatedDate:
-                            expando.CreatedDate = Convert.ToDateTime(r.CreatedDate).ToString("dd/MM/yyyy");
+                        case CAMPOS.DtExtrato:
+                            expando.DtExtrato = Convert.ToDateTime(r.DtExtrato).ToString("dd/MM/yyyy");
                             break;
-                        case CAMPOS.UserName:
-                            expando.UserName = r.UserName;
+                        case CAMPOS.FlTipo:
+                            expando.FlTipo = r.FlTipo;
                             break;
-                        case CAMPOS.Password:
-                            expando.Password = "*********";//r.Password;
-                            break;
-                        case CAMPOS.RealName:
-                            expando.RealName = r.RealName;
-                            break;
-                        case CAMPOS.NumCpf:
-                            expando.NumCpf = r.NumCpf;
-                            break;
-                        case CAMPOS.Email:
-                            expando.Email = r.Email;
-                            break;
-                        case CAMPOS.Phone:
-                            expando.Phone = r.Phone;                            
+                        case CAMPOS.VlMovimentado:
+                            expando.VlMovimentado = r.VlMovimentado;
                             break;
                     }
                 }
             }
             else
             {
-                expando.Id = r.Id;
-                expando.IsActive = r.IsActive.Equals(1) ? true : false;
-                expando.CreatedDate = Convert.ToDateTime(r.CreatedDate).ToString("dd/MM/yyyy");
-                expando.UserName = r.UserName;
-                expando.Password = "*********";//r.Password;
-                expando.RealName = r.RealName;
-                expando.NumCpf = r.NumCpf;
-                expando.Email = r.Email;
-                expando.Phone = r.Phone;
+                expando.IdExtrato = r.IdExtrato;
+                expando.UserId = r.UserId;
+                expando.DtExtrato = Convert.ToDateTime(r.DtExtrato).ToString("dd/MM/yyyy");
+                expando.FlTipo = r.FlTipo;
+                expando.VlMovimentado = r.VlMovimentado;
+
             }
 
             return expando;
@@ -179,17 +187,17 @@ namespace src.Services
                         CAMPOS filtroEnum = (CAMPOS)key;
                         switch (filtroEnum)
                         {
-                            case CAMPOS.Id:
-                                Int32 id = Convert.ToInt32(item.Value);
-                                param.Add(new MySqlConnector.MySqlParameter("@id", id));
-                                where += Environment.NewLine + "id like @id AND";
+                            case CAMPOS.IdExtrato:
+                                Int32 idExtrato = Convert.ToInt32(item.Value);
+                                param.Add(new MySqlConnector.MySqlParameter("@idExtrato", idExtrato));
+                                where += Environment.NewLine + "IdExtrato like @idExtrato AND";
                                 break;
-                            case CAMPOS.IsActive:
-                                Int16 isActive = Convert.ToInt16(item.Value);
-                                param.Add(new MySqlConnector.MySqlParameter("@isActive", isActive));
-                                where += Environment.NewLine + "isActive like @isActive AND";
+                            case CAMPOS.UserId:
+                                Int32 userId = Convert.ToInt32(item.Value);
+                                param.Add(new MySqlConnector.MySqlParameter("@userId", userId));
+                                where += Environment.NewLine + "UserId like @userId AND";
                                 break;
-                            case CAMPOS.CreatedDate:
+                            case CAMPOS.DtExtrato:
                                 if (item.Value[0].Contains("|")) // BETWEEN
                                 {
                                     string[] busca = item.Value.ToString().Split('|');
@@ -199,61 +207,28 @@ namespace src.Services
                                     string dtFim = Date.GetDate(dtaFim);
                                     param.Add(new MySqlConnector.MySqlParameter("@dtInicio", dtInicio));
                                     param.Add(new MySqlConnector.MySqlParameter("@dtFim", dtFim));
-                                    where += Environment.NewLine + "createdDate BETWEEN @dtInicio AND @dtFim AND";
+                                    where += Environment.NewLine + "dtExtrato BETWEEN @dtInicio AND @dtFim AND";
                                 }
                                 else
                                 {
                                     string busca = item.Value;
-                                    DateTime createdDate = DateTime.ParseExact(busca + " 00:00:00.000", "yyyyMMdd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                                    param.Add(new MySqlConnector.MySqlParameter("@dtTitulo", createdDate)); //.ToString("yyyyMMdd HH:mm:ss.fff")
-                                    where += Environment.NewLine + "createdDate = @createdDate AND";
+                                    DateTime dtExtrato = DateTime.ParseExact(busca + " 00:00:00.000", "yyyyMMdd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                                    param.Add(new MySqlConnector.MySqlParameter("@dtExtrato", dtExtrato)); //.ToString("yyyyMMdd HH:mm:ss.fff")
+                                    where += Environment.NewLine + "dtExtrato = @dtExtrato AND";
                                 }
                                 break;
-                            case CAMPOS.UserName:
-                                string userName = Convert.ToString(item.Value);
-                                if (userName.Contains("%"))
+                            case CAMPOS.FlTipo:
+                                string flTipo = Convert.ToString(item.Value);
+                                if (flTipo.Contains("%"))
                                 {
-                                    string busca = userName.Replace("%", "").ToString();
-                                    param.Add(new MySqlConnector.MySqlParameter("@userName", userName));
-                                    where += Environment.NewLine + "userName LIKE '%@userName%' AND";
+                                    string busca = flTipo.Replace("%", "").ToString();
+                                    param.Add(new MySqlConnector.MySqlParameter("@flTipo", flTipo));
+                                    where += Environment.NewLine + "flTipo LIKE '%@flTipo%' AND";
                                 }
                                 else
                                 {
-                                    param.Add(new MySqlConnector.MySqlParameter("@userName", userName));
-                                    where += Environment.NewLine + "userName = @userName AND";
-                                }
-                                break;
-                            case CAMPOS.NumCpf:
-                                Int32 numCpf = Convert.ToInt32(item.Value);
-                                param.Add(new MySqlConnector.MySqlParameter("@numCpf", numCpf));
-                                where += Environment.NewLine + "numCpf = @numCpf AND";
-                                break;
-                            case CAMPOS.Email:
-                                string email = Convert.ToString(item.Value);
-                                if (email.Contains("%"))
-                                {
-                                    string busca = email.Replace("%", "").ToString();
-                                    param.Add(new MySqlConnector.MySqlParameter("@email", busca));
-                                    where += Environment.NewLine + "email LIKE '%@email%' AND";
-                                }
-                                else
-                                {
-                                    param.Add(new MySqlConnector.MySqlParameter("@email", email));
-                                    where += Environment.NewLine + "email = @email AND";
-                                }
-                                break;
-                            case CAMPOS.Phone:
-                                string phone = Convert.ToString(item.Value);
-                                if (phone.Contains("%"))
-                                {
-                                    string busca = phone.Replace("%", "").ToString();
-                                    param.Add(new MySqlConnector.MySqlParameter("@phone", busca));
-                                    where += Environment.NewLine + "phone LIKE '%@phone%' AND";
-                                }
-                                else
-                                {
-                                    param.Add(new MySqlConnector.MySqlParameter("@phone", phone));
-                                    where += Environment.NewLine + "phone = @phone AND";
+                                    param.Add(new MySqlConnector.MySqlParameter("@flTipo", flTipo));
+                                    where += Environment.NewLine + "flTipo = @flTipo AND";
                                 }
                                 break;
                         }
@@ -268,16 +243,12 @@ namespace src.Services
 
         public enum CAMPOS
         {
-            Id = 100,
-            IsActive = 101,
-            CreatedDate = 102,
-            UserName = 103,
-            Password = 104,
-            RealName = 105,
-            NumCpf = 106,
-            Email = 107,
-            Phone = 108
-        };
+            IdExtrato = 101,
+            UserId = 102,
+            DtExtrato = 103,
+            FlTipo = 104,
+            VlMovimentado = 105
+        }
 
 
     }

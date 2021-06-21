@@ -1,0 +1,143 @@
+{
+	"info": {
+		"_postman_id": "93de0527-f59d-415a-989e-a54a8724236a",
+		"name": "Requests Postman",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Listar todos os usuários filtrando apenas as colunas [Nome, CPF, Email e Telefone]",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:5001/Users?col=105,106,107,108",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"Users"
+					],
+					"query": [
+						{
+							"key": "col",
+							"value": "105,106,107,108"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar apenas o usuário com email igual a teste@teste.com.br",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:5001/Users?col=105,106,107,108&107=teste@teste.com.br",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"Users"
+					],
+					"query": [
+						{
+							"key": "col",
+							"value": "105,106,107,108"
+						},
+						{
+							"key": "107",
+							"value": "teste@teste.com.br"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Extrato",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:5001/Extrato?102=1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"Extrato"
+					],
+					"query": [
+						{
+							"key": "102",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Saldo do Usuário",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:5001/Extrato/saldo?102=1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"Extrato",
+						"saldo"
+					],
+					"query": [
+						{
+							"key": "102",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Novo Endereço",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"idEndereco\": 0,\n  \"numCep\": \"49160011\",\n  \"dsLogradouro\": \"RUA XYZ\",\n  \"dsbairro\": \"TESTE\",\n  \"dsCidade\": \"TESTE\",\n  \"dsEstado\": \"SE\",\n  \"dsNumero\": \"989\",\n  \"userId\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/Endereco/AddEndereco",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"Endereco",
+						"AddEndereco"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

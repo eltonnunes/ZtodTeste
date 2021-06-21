@@ -1,0 +1,34 @@
+﻿<Properties StartupConfiguration="{B0558F76-C7A4-430B-847F-F2F2DF744AB3}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="README.MD">
+    <Files>
+      <File FileName="README.MD" Line="6" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="src" expanded="True">
+            <Node name="src" expanded="True">
+              <Node name="Controllers" expanded="True" />
+              <Node name="db" expanded="True" />
+              <Node name="Models" expanded="True" />
+              <Node name="Postman" expanded="True" />
+              <Node name="Services" expanded="True" />
+              <Node name="Utils" expanded="True" />
+              <Node name="README.MD" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.src PreferredExecutionTarget="/Applications/Safari.app" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <Debugger.DebugSourceFolders>
+    <String>/Users/eltonnunes/Library/Caches/VisualStudio/8.0/Symbols/mysql-net/MySqlConnector/c86af2e49bb867ff1e428e35d85198e2c5167631</String>
+  </Debugger.DebugSourceFolders>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>

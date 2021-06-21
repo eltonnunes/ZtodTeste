@@ -153,6 +153,10 @@ INSERT INTO dev.extrato (userId, dtExtrato, flTipo, vlMovimentado) VALUES
 INSERT INTO dev.extrato (userId, dtExtrato, flTipo, vlMovimentado) VALUES
 (2, NOW(), 'CREDIT', 10.00);
 
+INSERT INTO dev.extrato (userId, dtExtrato, flTipo, vlMovimentado) VALUES
+(1, NOW(), 'DEBIT', 30.00);
+
+
 INSERT INTO categoria (idCategoria, nome) VALUES
 (1, 'Carros, peças e Acessórios'),
 (2, 'Casa e Escritório'),

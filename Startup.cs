@@ -11,9 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using src.database;
+using src.Models;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace src
 {
@@ -28,15 +30,21 @@ namespace src
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var connectionString = Configuration.GetConnectionString("DefaultConnection");
-            var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
+            string connectionString = Configuration.GetConnectionString("DefaultConnection");
+            var serverVersion = new MySqlServerVersion(new Version(8, 0, 21)); //Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.25-mysql");//
 
-            services.AddDbContext<ApplicationDBContext>(
-                dbContextOptions => dbContextOptions
-                    .UseMySql(connectionString, serverVersion)
-                    .EnableSensitiveDataLogging() 
-                    .EnableDetailedErrors()       // <-- debugging (remover em produção').
+            services.AddDbContext<devContext>(options =>
+            {
+            string connectionString = Configuration.GetConnectionString("DefaultConnection");
+            options.UseMySql(connectionString,
+                ServerVersion.AutoDetect(connectionString),
+                mySqlOptions =>
+                    mySqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 10,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null)
             );
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

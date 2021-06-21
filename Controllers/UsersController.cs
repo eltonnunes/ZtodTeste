@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Dynamic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using src.database;
-using src.database.Models;
+using Microsoft.AspNetCore.Http;
+using src.Models;
+using src.Services;
 
 namespace src.Controllers
 {
@@ -15,22 +14,28 @@ namespace src.Controllers
     {
         
 
-        public ApplicationDBContext _db;
+        private readonly devContext _db;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(devContext context, ILogger<UsersController> logger)
         {
-            _logger = logger;
+            _db = context;
+            ILogger _logger = logger;
         }
 
         [HttpGet]
-        public List<User> Get()
+        public async Task<ActionResult<ExpandoObject>> Get() //List<User> 
         {
+                IQueryCollection queryString = Request.Query;
+            var result = await UserService.ListAll(_db,queryString);
+            return result;
 
+        }
 
-            List<User> list = _db.Users.Select( e => e ).ToList<User>();
-            return list;
-    
-
+        [HttpPost("AddUser")]
+        public async Task<ActionResult<ExpandoObject>> AddUser([FromBody] User user)
+        {
+            var result = await UserService.Create(_db, user);
+            return result;
         }
     }
 }
